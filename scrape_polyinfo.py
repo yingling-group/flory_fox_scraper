@@ -35,11 +35,14 @@ login_info = {
 	"IDToken0" : "",
 }
 
+# Create session object
+session_requests = requests.Session()
+
 # Login to PoLyInfo search page
 login_url = "https://login-matnavi.nims.go.jp/sso/UI/Login?goto="\
             + "http%3A%2F%2Fpolymer.nims.go.jp%3A80%2FPoLyInfo%2Fcgi-bin%2Fp"\
             +"-search.cgi"
-login_result = requests.post(
+login_result = session_requests.post(
 	login_url,
 	data = login_info,
 )
@@ -50,11 +53,18 @@ if 'Authentication failed.' in login_result.content:
 #        Data Import                                                          #
 ###############################################################################
 
-# Get polymer classes
-ez_browse_url = "http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi"
-ez_browse_html = urllib2.urlopen(ez_browse_url)
-ez_browse = BeautifulSoup(ez_browse_html,"lxml")
-
+# Get polymer classes and abbreviations from Easy-browse property table
+poly_classes = []
+class_abbr = {}
+eb_url = "http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi"
+eb = session_requests.get(eb_url)
+eb_soup = BeautifulSoup(eb.content,'lxml')
+eb_table = eb_soup.find('table',bgcolor='#808080')
+for row in eb_table.find_all('tr'):
+	first_cell = row.find('td',class_='small_border')
+	if first_cell:
+		poly_classes.append(first_cell.find('a').contents[0])
+		class_abbr[poly_classes[-1]] = first_cell.find('a')['href'][-9:-5]
 
 ###############################################################################
 #        Denoument                                                            #
