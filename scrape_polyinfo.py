@@ -17,7 +17,8 @@ For internal evaluation by Citrine Informatics only.
 import time
 import requests
 from bs4 import BeautifulSoup
-import urllib2
+import numpy as np
+import pandas as pd
 
 # Start the clock
 t_start = time.time()
@@ -50,22 +51,88 @@ if 'Authentication failed.' in login_result.content:
 	print "ERROR: PoLyInfo login unsuccessful. Check username and/or password!"
 
 ###############################################################################
-#        Data Import                                                          #
+#        Functions                                                            #
 ###############################################################################
 
-# Get polymer classes and abbreviations from Easy-browse property table
-poly_classes = []
+# Get tables from a PoLyInfo URL.
+def get_pi_table(url):
+	page = session_requests.get(url)
+	soup = BeautifulSoup(page.content,'lxml')
+	return soup.find('table',bgcolor='#808080')
+
+###############################################################################
+#        Polymer Classes                                                      #
+###############################################################################
+
+all_classes = []
 class_abbr = {}
 eb_url = "http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi"
-eb = session_requests.get(eb_url)
-eb_soup = BeautifulSoup(eb.content,'lxml')
-eb_table = eb_soup.find('table',bgcolor='#808080')
+eb_table = get_pi_table(eb_url)
 for row in eb_table.find_all('tr'):
 	first_cell = row.find('td',class_='small_border')
 	if first_cell:
-		poly_classes.append(first_cell.find('a').contents[0])
-		class_abbr[poly_classes[-1]] = first_cell.find('a')['href'][-9:-5]
+		all_classes.append(first_cell.find('a').contents[0])
+		class_abbr[all_classes[-1]] = first_cell.find('a')['href'][-9:-5]
 
+###############################################################################
+#        Polymer Class Loop                                                   #
+###############################################################################
+
+# Initialize master lists
+poly_class = []
+poly_name = []
+pid = []
+Tg = []
+Mn = []
+
+# Loop through each polymer class
+for class_i in all_classes:
+	abbr_i = class_abbr[class_i]
+	
+	# Find C Count value with most Tg data points available
+	class_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi?'\
+	             + 'H=Thermal&vtype=points&V=cn&vpclass=' + abbr_i + '&vcn='
+	class_table = get_pi_table(class_url)
+	Tg_datapoints = []
+	C_counts = []
+	for row in class_table.find_all('tr'):
+		if row.find('td',class_='small_border'):
+			cells = row.find_all('td')
+			C_counts.append(cells[0].find('a').contents[0])
+			Tg_dps_i = cells[1].contents[0]
+			if Tg_dps_i == '-':
+				Tg_datapoints.append(0)
+			else:
+				Tg_datapoints.append(int(Tg_dps_i))
+	most_Tg_dps = max(Tg_datapoints)
+	tgt_C_count = C_counts[Tg_datapoints.index(most_Tg_dps)]
+	
+	# Find polymer ID, name, and Tg datatable url with most datapoints available
+	c_count_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.'\
+	             + 'cgi?H=Thermal&vtype=points&V=pi&vpclass=' + abbr_i \
+	             + '&vcn=' + abbr_i + '-' + tgt_C_count
+	c_count_table = get_pi_table(c_count_url)
+	c_count_pid = []
+	c_count_name = []
+	Tg_datapoints = []
+	Tg_urls = []
+	for row in c_count_table.find_all('tr'):
+		if row.find('td',class_='small_border'):
+			cells = row.find_all('td')
+			c_count_pid.append(cells[0].find('a')['href'][-7:])
+			c_count_name.append(cells[0].find('a').contents[0])
+			Tg_dps_i = cells[1].find('a')
+			if Tg_dps_i:
+				Tg_datapoints.append(int(Tg_dps_i.contents[0]))
+				Tg_urls.append(str(Tg_dps_i['href']))
+			else:
+				Tg_datapoints.append(0)
+				Tg_urls.append('')
+	most_Tg_dps = max(Tg_datapoints)
+	tgt_pid = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
+	tgt_name = c_count_name[Tg_datapoints.index(most_Tg_dps)]
+	tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
+	
 ###############################################################################
 #        Denoument                                                            #
 ###############################################################################
