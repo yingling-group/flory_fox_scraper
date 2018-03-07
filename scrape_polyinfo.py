@@ -143,7 +143,7 @@ for class_i in all_classes:
     
     # Compile list of Sample ID's of neat resin from Tg datatable
     n_pages = int(ceil(most_Tg_dps/20.))
-    sid = []
+    sid_list = []
     for c_page in range(n_pages):
         Tg_table = get_Tg_table(tgt_Tg_url,c_page)
         for row in Tg_table.find_all('tr'):
@@ -151,8 +151,22 @@ for class_i in all_classes:
                 cells = row.find_all('td')
                 row_sid = str(cells[1].find('a').contents[0])
                 if cells[2].text == "Neat resin" and "ca" not in cells[4].text:
-                    sid.append(row_sid)
-    sid = list(set(sid))
+                    sid_list.append(row_sid)
+                    break
+        break
+    sid_list = list(set(sid_list))
+
+    # Extract Tg and Mn from sample pages
+    for sid in sid_list:
+        url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/ho-id-search.cgi?'\
+            + 'PID=' + tgt_pid + '&SID=' + sid + '&layout=info'
+        page = session_requests.get(url)
+        soup = BeautifulSoup(page.content,'lxml')
+        for prop in soup.find_all('li'):
+            if str(prop.contents[0]) == " Glass transition temp.\n      ":
+                for detail in prop.find_all('ul'):
+                    print detail
+    break 
 
 ###############################################################################
 #        Denoument                                                            #
