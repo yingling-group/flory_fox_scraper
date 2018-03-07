@@ -16,6 +16,7 @@ For internal evaluation by Citrine Informatics only.
 
 import time
 import sys
+import re
 import requests
 from bs4 import BeautifulSoup
 from math import ceil
@@ -72,13 +73,19 @@ def get_Tg_table(url,page_num):
 
 # Return list of floats contained within a string
 def get_nums(s):
+    num_str = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",\
+                          s)
     nums = []
-    for word in s.split():
-        try:
-            nums.append(float(word))
-        except ValueError:
-            pass
+    for num in num_str:
+        nums.append(float(num))
     return nums
+
+# Return the number (8 digits or less) immediately after the first instance of 
+# some string within a larger string (e.g. an html page)
+def val_after_str(split_s,page_s):
+    val_str = page_s.split(split_s,1)[1][0:9]
+    val = get_nums(val_str)[0]
+    return val
 
 ###############################################################################
 #        Polymer Classes                                                      #
@@ -100,8 +107,10 @@ for row in eb_table.find_all('tr'):
 
 # Initialize master lists
 poly_class = []
+poly_class_abbr = []
 poly_name = []
 pid = []
+sid = []
 Tg = []
 Mn = []
 
@@ -149,8 +158,8 @@ for class_i in all_classes:
                 Tg_datapoints.append(0)
                 Tg_urls.append('')
     most_Tg_dps = max(Tg_datapoints)
-    tgt_pid = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
-    tgt_name = c_count_name[Tg_datapoints.index(most_Tg_dps)]
+    pid_i = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
+    poly_name_i = c_count_name[Tg_datapoints.index(most_Tg_dps)]
     tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
     
     # Compile list of Sample ID's of neat resin from Tg datatable
@@ -169,9 +178,9 @@ for class_i in all_classes:
     sid_list = list(set(sid_list))
 
     # Extract Tg and Mn from sample pages
-    for sid in sid_list:
+    for sid_i in sid_list:
         url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/ho-id-search.cgi?'\
-            + 'PID=' + tgt_pid + '&SID=' + sid + '&layout=info'
+            + 'PID=' + pid_i + '&SID=' + sid_i + '&layout=info'
         page = session_requests.get(url)
         soup = BeautifulSoup(page.content,'lxml')
         # Extract Tg
@@ -183,7 +192,25 @@ for class_i in all_classes:
                     if '[C]' in Tg_str:
                         Tg_K = Tg_K + 273.15
         # Find Mn
-        
+        if 'Mn=' in page.content:
+            # Calculate from Molecular Weight and Mw/Mn if necessary
+            if 'Mw/Mn=' and 'Mw=' in page.content:
+                Mw = val_after_str('Mw=', page.content)
+                Mw_ovr_Mn = val_after_str('Mw/Mn=', page.content)
+                Mn_i = Mw/Mw_ovr_Mn
+            # Use Mn if given, but make sure it's Mn and not Mw/Mn
+            else:
+                Mn_tmp = val_after_str('Mn=', page.content)
+                if Mn_tmp > 10.:
+                    Mn_i = Mn_tmp
+        if Mn_i:
+            poly_class.append(class_i)
+            poly_class_abbr.append(abbr_i)
+            poly_name.append(poly_name_i)
+            pid.append(pid_i)
+            sid.append(sid_i)
+            Tg.append(Tg_K)
+            Mn.append(Mn_i)
     break 
 
 ###############################################################################
