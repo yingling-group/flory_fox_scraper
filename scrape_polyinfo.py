@@ -15,6 +15,7 @@ For internal evaluation by Citrine Informatics only.
 ###############################################################################
 
 import time
+import sys
 import requests
 from bs4 import BeautifulSoup
 from math import ceil
@@ -49,7 +50,8 @@ login_result = session_requests.post(
         data = login_info,
 )
 if 'Authentication failed.' in login_result.content:
-    print "ERROR: PoLyInfo login unsuccessful. Check username and/or password!"
+    sys.exit("ERROR: PoLyInfo login unsuccessful."\
+             + " Check username and/or password!")
 
 ###############################################################################
 #        Functions                                                            #
@@ -172,6 +174,7 @@ for class_i in all_classes:
             + 'PID=' + tgt_pid + '&SID=' + sid + '&layout=info'
         page = session_requests.get(url)
         soup = BeautifulSoup(page.content,'lxml')
+        # Extract Tg
         for prop in soup.find_all('li'):
             if str(prop.contents[0]) == " Glass transition temp.\n      ":
                 for detail in prop.find_all('ul'):
@@ -179,6 +182,8 @@ for class_i in all_classes:
                     Tg_K = get_nums(Tg_str)[-1]
                     if '[C]' in Tg_str:
                         Tg_K = Tg_K + 273.15
+        # Find Mn
+        
     break 
 
 ###############################################################################
