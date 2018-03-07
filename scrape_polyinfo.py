@@ -58,6 +58,8 @@ if 'Authentication failed.' in login_result.content:
              + " Check username and/or password!")
 print 'Login succcessful!\n'
 
+sys.stdout.flush()
+
 ###############################################################################
 #        Functions                                                            #
 ###############################################################################
@@ -98,6 +100,7 @@ def val_after_str(split_s,page_s):
 ###############################################################################
 
 print 'Collecting polymer class list...'
+sys.stdout.flush()
 all_classes = []
 class_abbr = {}
 eb_url = "http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi"
@@ -108,6 +111,7 @@ for row in eb_table.find_all('tr'):
         all_classes.append(str(first_cell.find('a').contents[0]))
         class_abbr[all_classes[-1]] = first_cell.find('a')['href'][-9:-5]
 print '%i polymer classes identified.\n' % (len(all_classes))
+sys.stdout.flush()
 
 ###############################################################################
 #        Polymer Class Loop                                                   #
@@ -178,6 +182,7 @@ for class_i in all_classes:
           '\tPID: %s\n'
           '\t%i Tg Measurements \n' 
            % (poly_name_i, pid_i, most_Tg_dps))
+    sys.stdout.flush()
     
     # Compile list of Sample ID's of neat resin from Tg datatable
     print '\tCompiling neat resin sample IDs...'
@@ -185,6 +190,7 @@ for class_i in all_classes:
     sid_list = []
     for c_page in range(n_pages):
         print '\t...Page %i of %i...' % (c_page + 1, n_pages)
+        sys.stdout.flush()
         Tg_table = get_Tg_table(tgt_Tg_url,c_page)
         for row in Tg_table.find_all('tr'):
             if row.find('td',class_='small_border'):
@@ -197,6 +203,7 @@ for class_i in all_classes:
     
     # Extract Tg and Mn from sample pages
     print '\tScanning samples...'
+    sys.stdout.flush()
     n_poly_points = 0
     for sid_i in sid_list:
         url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/ho-id-search.cgi?'\
@@ -237,6 +244,7 @@ for class_i in all_classes:
             n_poly_points = n_poly_points + 1
     print '\tSample scan complete. %i datapoints added for %s.\n' % \
             (n_poly_points,poly_name_i)
+    sys.stdout.flush()
 
 ###############################################################################
 #        Denoument                                                            #
