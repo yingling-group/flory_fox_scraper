@@ -20,13 +20,15 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from math import ceil
-import numpy as np
 import pandas as pd
 
 # Start the clock
 t_start = time.time()
 update = 1
 total_points = 0
+
+# Output File name:
+fname = 'flory_fox'
 
 ###############################################################################
 #        PoLyInfo Login                                                       #
@@ -98,7 +100,7 @@ eb_table = get_pi_table(eb_url)
 for row in eb_table.find_all('tr'):
     first_cell = row.find('td',class_='small_border')
     if first_cell:
-        all_classes.append(first_cell.find('a').contents[0])
+        all_classes.append(str(first_cell.find('a').contents[0]))
         class_abbr[all_classes[-1]] = first_cell.find('a')['href'][-9:-5]
 
 ###############################################################################
@@ -142,14 +144,14 @@ for class_i in all_classes:
                 + '&vcn=' + abbr_i + '-' + tgt_C_count
     c_count_table = get_pi_table(c_count_url)
     c_count_pid = []
-    c_count_name = []
+    c_count_names = []
     Tg_datapoints = []
     Tg_urls = []
     for row in c_count_table.find_all('tr'):
         if row.find('td',class_='small_border'):
             cells = row.find_all('td')
             c_count_pid.append(cells[0].find('a')['href'][-7:])
-            c_count_name.append(cells[0].find('a').contents[0])
+            c_count_names.append(cells[0].find('a').contents[0])
             Tg_dps_i = cells[1].find('a')
             if Tg_dps_i:
                 Tg_datapoints.append(int(Tg_dps_i.contents[0]))
@@ -159,7 +161,7 @@ for class_i in all_classes:
                 Tg_urls.append('')
     most_Tg_dps = max(Tg_datapoints)
     pid_i = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
-    poly_name_i = c_count_name[Tg_datapoints.index(most_Tg_dps)]
+    poly_name_i = str(c_count_names[Tg_datapoints.index(most_Tg_dps)])
     tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
     
     # Compile list of Sample ID's of neat resin from Tg datatable
@@ -203,7 +205,8 @@ for class_i in all_classes:
                 Mn_tmp = val_after_str('Mn=', page.content)
                 if Mn_tmp > 10.:
                     Mn_i = Mn_tmp
-        if Mn_i:
+        # Append to lists if values found
+        if Mn_i and Tg_K:
             poly_class.append(class_i)
             poly_class_abbr.append(abbr_i)
             poly_name.append(poly_name_i)
@@ -217,6 +220,18 @@ for class_i in all_classes:
 #        Denoument                                                            #
 ###############################################################################
 
+# Create and print dataframe to CSV
+polyinfo_dat = {'Class': poly_class, \
+                'Class Abbr.': poly_class_abbr, \
+                'Name': poly_name, \
+                'PID': pid, \
+                'SID': sid, \
+                'Tg (K)': Tg, \
+                'Mn (g/mol)': Mn }
+polyinfo_df = pd.DataFrame(data=polyinfo_dat)
+polyinfo_df.to_csv(fname + '.csv')
+
+total_points = len(Mn)
 total_time = time.time() - t_start
 print 'Success!'
 print 'Excecution time: %.2f min for %i data points' % \
