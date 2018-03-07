@@ -68,6 +68,16 @@ def get_Tg_table(url,page_num):
     soup = BeautifulSoup(page.content,'lxml')
     return soup.find_all('table',bgcolor='#808080')[1]
 
+# Return list of floats contained within a string
+def get_nums(s):
+    nums = []
+    for word in s.split():
+        try:
+            nums.append(float(word))
+        except ValueError:
+            pass
+    return nums
+
 ###############################################################################
 #        Polymer Classes                                                      #
 ###############################################################################
@@ -96,8 +106,8 @@ Mn = []
 # Loop through each polymer class
 for class_i in all_classes:
     abbr_i = class_abbr[class_i]
-	
-	# Find C Count value with most Tg data points available
+    
+    # Find C Count value with most Tg data points available
     class_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi?'\
                 + 'H=Thermal&vtype=points&V=cn&vpclass=' + abbr_i + '&vcn='
     class_table = get_pi_table(class_url)
@@ -114,8 +124,8 @@ for class_i in all_classes:
                 Tg_datapoints.append(int(Tg_dps_i))
     most_Tg_dps = max(Tg_datapoints)
     tgt_C_count = C_counts[Tg_datapoints.index(most_Tg_dps)]
-	
-	# Find polymer ID, name, and Tg datatable url with most datapoints available
+
+    # Find polymer ID, name, and Tg datatable url with most datapoints available
     c_count_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.'\
                 + 'cgi?H=Thermal&vtype=points&V=pi&vpclass=' + abbr_i \
                 + '&vcn=' + abbr_i + '-' + tgt_C_count
@@ -165,7 +175,10 @@ for class_i in all_classes:
         for prop in soup.find_all('li'):
             if str(prop.contents[0]) == " Glass transition temp.\n      ":
                 for detail in prop.find_all('ul'):
-                    print detail
+                    Tg_str = detail.find_all('li')[0].contents[0]
+                    Tg_K = get_nums(Tg_str)[-1]
+                    if '[C]' in Tg_str:
+                        Tg_K = Tg_K + 273.15
     break 
 
 ###############################################################################
