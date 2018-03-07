@@ -152,9 +152,8 @@ for class_i in all_classes:
                 row_sid = str(cells[1].find('a').contents[0])
                 if cells[2].text == "Neat resin" and "ca" not in cells[4].text:
                     sid.append(row_sid)
-    print sid
-    break
-	
+    sid = list(set(sid))
+
 ###############################################################################
 #        Denoument                                                            #
 ###############################################################################
