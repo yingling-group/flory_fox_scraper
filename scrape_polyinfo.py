@@ -68,15 +68,25 @@ sys.stdout.flush()
 def get_pi_table(url):
     page = session_requests.get(url)
     soup = BeautifulSoup(page.content,'lxml')
-    return soup.find('table',bgcolor='#808080')
+    try:
+        table = soup.find('table',bgcolor='#808080')
+    except IndexError:
+        print 'Unexpected format at %s. Skipping...' % (url)
+        table = BeautifulSoup('','lxml')
+    return table
 
-# Get table of from single-polymer Tg pages
+# Get table from single-polymer Tg pages
 def get_Tg_table(url,page_num):
     payload = { "page" : str(page_num+1) }
     page = session_requests.get(url, params = payload)
     soup = BeautifulSoup(page.content,'lxml')
-    return soup.find_all('table',bgcolor='#808080')[1]
-
+    try:
+        table = soup.find_all('table',bgcolor='#808080')[1]
+    except IndexError:
+        print '\tUnexpected format on page %i. Skipping...' % (page_num+1)
+        table = BeautifulSoup('','lxml')
+    return table
+        
 # Return list of floats contained within a string
 def get_nums(s):
     num_str = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",\
@@ -176,7 +186,7 @@ for class_i in all_classes:
     tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
     if pid_i in pid:
         print 'Polymer %s (PID=%s) already compiled.' % (poly_name_i, pid_i)
-        break
+        continue
     print( 'Candidate identified.\n' 
           '\tName: %s\n'
           '\tPID: %s\n'
