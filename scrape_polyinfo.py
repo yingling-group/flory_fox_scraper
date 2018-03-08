@@ -192,6 +192,9 @@ for class_i in all_classes:
           '\tPID: %s\n'
           '\t%i Tg Measurements \n' 
            % (poly_name_i, pid_i, most_Tg_dps))
+    if pid_i == 'P020001':
+        print 'Stopping Scraping...'
+	   break
     sys.stdout.flush()
     
     # Compile list of Sample ID's of neat resin from Tg datatable
