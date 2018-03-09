@@ -28,15 +28,13 @@ t_start = time.time()
 total_points = 0
 
 # Input filename:
-#i_fname = raw_input('Enter input filename: ')
-i_fname = 'flory_fox.csv'
+i_fname = raw_input('Enter input filename: ')
 raw_dat = pd.read_csv(i_fname, skiprows = 1, index_col = 0, \
                       names=['p_class','class_abbr','Mn','name','pid','sid',\
                              'Tg'])
 
 # Output prefix:
-#o_prefix = raw_input('Enter output prefix: ')
-o_prefix = 'test'
+o_prefix = raw_input('Enter output prefix: ')
 if not os.path.isdir(o_prefix + '_plots'):
     os.mkdir(o_prefix + '_plots')
 
