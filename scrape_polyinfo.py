@@ -24,47 +24,41 @@ import pandas as pd
 
 # Start the clock
 t_start = time.time()
-update = 1
 total_points = 0
 
 # Output File name:
-fname = 'flory_fox2'
+fname = 'polyinfo'
 
-switch = True
-
-###############################################################################
-#        PoLyInfo Login                                                       #
-###############################################################################
-
-# My PoLyInfo Login Info
+# PoLyInfo Login Info
 login_info = {
         "IDToken1" : "jspeerle@ncsu.edu",
         "IDToken2" : "0rr!S1*SAs1b",
         "IDToken0" : "",
 }
 
-# Create session object
-session_requests = requests.Session()
-
-# Login to PoLyInfo search page
-print 'Logging in to PoLyInfo...'
-login_url = "https://login-matnavi.nims.go.jp/sso/UI/Login?goto="\
-            + "http%3A%2F%2Fpolymer.nims.go.jp%3A80%2FPoLyInfo%2Fcgi-bin%2Fp"\
-            +"-search.cgi"
-login_result = session_requests.post(
-        login_url,
-        data = login_info,
-)
-if 'Authentication failed.' in login_result.content:
-    sys.exit("ERROR: PoLyInfo login unsuccessful."\
-             + " Check username and/or password!")
-print 'Login succcessful!\n'
-
-sys.stdout.flush()
-
 ###############################################################################
 #        Functions                                                            #
 ###############################################################################
+
+# Create new session and log into PoLyInfo
+def polyinfo_login():
+    global t_last_login
+    # Create session object
+    ses_req = requests.Session()
+
+    # Login to PoLyInfo search page
+    print 'Logging in to PoLyInfo...'
+    login_url = "https://login-matnavi.nims.go.jp/sso/UI/Login?goto="\
+            + "http%3A%2F%2Fpolymer.nims.go.jp%3A80%2FPoLyInfo%2Fcgi-bin%2Fp"\
+            +"-search.cgi"
+    login_result = ses_req.post(login_url, data = login_info)
+    if 'Authentication failed.' in login_result.content:
+        sys.exit("ERROR: PoLyInfo login unsuccessful."\
+                 + " Check username and/or password!")
+    print 'Login succcessful!\n'
+    sys.stdout.flush()
+    t_last_login = time.time()
+    return ses_req
 
 # Get table from a PoLyInfo URL for C-count or multiple polymer pages.
 def get_pi_table(url):
@@ -111,6 +105,8 @@ def val_after_str(split_s,page_s):
 #        Polymer Classes                                                      #
 ###############################################################################
 
+session_requests = polyinfo_login()
+
 print 'Collecting polymer class list...'
 sys.stdout.flush()
 all_classes = []
@@ -142,6 +138,11 @@ Mn = []
 for class_i in all_classes:
     print 'Identifying candidate for %s class...' % (class_i)
     abbr_i = class_abbr[class_i]
+    
+    # Re-login if necessary
+    if (time.time()-t_last_login) > 7200.:
+        print 'Session refresh required...'
+        session_requests = polyinfo_login()
     
     # Find C Count value with most Tg data points available
     class_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi?'\
@@ -194,11 +195,6 @@ for class_i in all_classes:
           '\tPID: %s\n'
           '\t%i Tg Measurements \n' 
            % (poly_name_i, pid_i, most_Tg_dps))
-    if pid_i == 'P020001':
-        switch = False
-    if switch:
-        print 'Skipping..'
-        continue
     sys.stdout.flush()
     
     # Compile list of Sample ID's of neat resin from Tg datatable
