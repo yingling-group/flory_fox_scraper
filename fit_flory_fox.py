@@ -21,6 +21,8 @@ import numpy as np
 from scipy import stats
 from numpy.linalg import inv
 from math import sqrt
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # Start the clock
