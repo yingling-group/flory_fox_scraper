@@ -28,7 +28,9 @@ update = 1
 total_points = 0
 
 # Output File name:
-fname = 'flory_fox'
+fname = 'flory_fox2'
+
+switch = True
 
 ###############################################################################
 #        PoLyInfo Login                                                       #
@@ -193,8 +195,10 @@ for class_i in all_classes:
           '\t%i Tg Measurements \n' 
            % (poly_name_i, pid_i, most_Tg_dps))
     if pid_i == 'P020001':
-        print 'Stopping Scraping...'
-	break
+        switch = False
+    if switch:
+        print 'Skipping..'
+        continue
     sys.stdout.flush()
     
     # Compile list of Sample ID's of neat resin from Tg datatable
