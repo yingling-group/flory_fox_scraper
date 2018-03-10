@@ -27,12 +27,14 @@ t_start = time.time()
 total_points = 0
 
 # Output File name:
-fname = 'polyinfo'
+fname = raw_input('Enter output file name prefix: ')
 
 # PoLyInfo Login Info
+email = raw_input('Enter PoLyInfo login email: ')
+password = raw_input('Password: ')
 login_info = {
-        "IDToken1" : "jspeerle@ncsu.edu",
-        "IDToken2" : "0rr!S1*SAs1b",
+        "IDToken1" : email,
+        "IDToken2" : password,
         "IDToken0" : "",
 }
 
@@ -245,13 +247,14 @@ for class_i in all_classes:
                     Mn_i = Mn_tmp
         # Append to lists if values found and reset
         if Mn_i and Tg_K:
-            polyinfo_df.append({ 'p_class' : class_i,
-                            'class_abbr' : abbr_i,
-                            'name' : poly_name_i,
-                            'pid' : pid_i,
-                            'sid' : sid_i,
-                            'Tg' : Tg_K,
-                            'Mn': Mn_i }, ignore_index=True )
+            polyinfo_df = polyinfo_df.append({ 'p_class' : class_i,
+                                               'class_abbr' : abbr_i,
+                                               'name' : poly_name_i,
+                                               'pid' : pid_i,
+                                               'sid' : sid_i,
+                                               'Tg' : Tg_K,
+                                               'Mn': Mn_i },
+                                               ignore_index = True )
             Mn_i = False
             Tg_K = False
             n_poly_points = n_poly_points + 1
