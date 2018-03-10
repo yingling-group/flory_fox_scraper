@@ -97,12 +97,12 @@ def get_nums(s):
 # Return the number (8 digits or less) immediately after the first instance of 
 # some string within a larger string (e.g. an html page)
 def val_after_str(split_s,page_s):
-    val_str = page_s.split(split_s,1)[1][0:6]
+    val_str = page_s.split(split_s,1)[1][0:9]
     val = get_nums(val_str)[0]
     return val
 
 ###############################################################################
-#        Polymer Classes                                                      #
+#        Get Polymer Classes                                                  #
 ###############################################################################
 
 session_requests = polyinfo_login()
@@ -125,14 +125,14 @@ sys.stdout.flush()
 #        Polymer Class Loop                                                   #
 ###############################################################################
 
-# Initialize master lists
-poly_class = []
-poly_class_abbr = []
-poly_name = []
-pid = []
-sid = []
-Tg = []
-Mn = []
+# Initialize dataframe
+polyinfo_df = pd.DataFrame(data = { 'p_class' : [],
+                            'class_abbr' : [],
+                            'name' : [],
+                            'pid' : [],
+                            'sid' : [],
+                            'Tg' : [],
+                            'Mn': [] })
 
 # Loop through each polymer class
 for class_i in all_classes:
@@ -187,7 +187,7 @@ for class_i in all_classes:
     pid_i = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
     poly_name_i = str(c_count_names[Tg_datapoints.index(most_Tg_dps)])
     tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
-    if pid_i in pid:
+    if pid_i in polyinfo_df.pid:
         print 'Polymer %s (PID=%s) already compiled.' % (poly_name_i, pid_i)
         continue
     print( 'Candidate identified.\n' 
@@ -219,39 +219,39 @@ for class_i in all_classes:
     sys.stdout.flush()
     n_poly_points = 0
     for sid_i in sid_list:
-        url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/ho-id-search.cgi?'\
+        samp_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/ho-id-search.cgi?'\
             + 'PID=' + pid_i + '&SID=' + sid_i + '&layout=info'
-        page = session_requests.get(url)
-        soup = BeautifulSoup(page.content,'lxml')
+        samp_page = session_requests.get(samp_url)
+        samp_soup = BeautifulSoup(samp_page.content,'lxml')
         # Extract Tg
-        for prop in soup.find_all('li'):
+        for prop in samp_soup.find_all('li'):
             if str(prop.contents[0]) == " Glass transition temp.\n      ":
                 for detail in prop.find_all('ul'):
                     Tg_str = detail.find_all('li')[0].contents[0]
                     Tg_K = get_nums(Tg_str)[-1]
                     if Tg_K and '[C]' in Tg_str:
                         Tg_K = Tg_K + 273.15
-        # Find Mn
-        if 'Mn=' in page.content:
+        # Extract Mn
+        if 'Mn=' in samp_page.content:
             # Calculate from Molecular Weight and Mw/Mn if necessary
-            if 'Mw/Mn=' in page.content and 'Mw=' in page.content:
-                Mw = val_after_str('Mw=', page.content)
-                Mw_ovr_Mn = val_after_str('Mw/Mn=', page.content)
+            if 'Mw/Mn=' in samp_page.content and 'Mw=' in samp_page.content:
+                Mw = val_after_str('Mw=', samp_page.content)
+                Mw_ovr_Mn = val_after_str('Mw/Mn=', samp_page.content)
                 Mn_i = Mw/Mw_ovr_Mn
             # Use Mn if given, but make sure it's Mn and not Mw/Mn
             else:
-                Mn_tmp = val_after_str('Mn=', page.content)
+                Mn_tmp = val_after_str('Mn=', samp_page.content)
                 if Mn_tmp > 10.:
                     Mn_i = Mn_tmp
-        # Append to lists if values found
+        # Append to lists if values found and reset
         if Mn_i and Tg_K:
-            poly_class.append(class_i)
-            poly_class_abbr.append(abbr_i)
-            poly_name.append(poly_name_i)
-            pid.append(pid_i)
-            sid.append(sid_i)
-            Tg.append(Tg_K)
-            Mn.append(Mn_i)
+            polyinfo_df.append({ 'p_class' : class_i,
+                            'class_abbr' : abbr_i,
+                            'name' : poly_name_i,
+                            'pid' : pid_i,
+                            'sid' : sid_i,
+                            'Tg' : Tg_K,
+                            'Mn': Mn_i }, ignore_index=True )
             Mn_i = False
             Tg_K = False
             n_poly_points = n_poly_points + 1
@@ -264,17 +264,9 @@ for class_i in all_classes:
 ###############################################################################
 
 # Create and print dataframe to CSV
-polyinfo_dat = {'Class': poly_class, \
-                'Class Abbr.': poly_class_abbr, \
-                'Name': poly_name, \
-                'PID': pid, \
-                'SID': sid, \
-                'Tg (K)': Tg, \
-                'Mn (g/mol)': Mn }
-polyinfo_df = pd.DataFrame(data=polyinfo_dat)
 polyinfo_df.to_csv(fname + '.csv')
 
-total_points = len(Mn)
+total_points = len(polyinfo_df)
 total_time = time.time() - t_start
 print 'Success!'
 print 'Excecution time: %.2f min for %i data points' % \
