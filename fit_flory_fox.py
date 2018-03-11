@@ -45,6 +45,9 @@ plt.style.use('ggplot')
 ###############################################################################
 
 n_polys = raw_dat.pid.nunique()
+empty_list = []
+for i in range(n_polys):
+    empty_list.append([])
 poly_info = pd.DataFrame({'name' : raw_dat.name.unique(),
                           'pid' : raw_dat.pid.unique(),
                           'p_class' : raw_dat.p_class.unique(),
@@ -53,9 +56,9 @@ poly_info = pd.DataFrame({'name' : raw_dat.name.unique(),
                           'Tg_inf' : np.zeros(n_polys),
                           'K' : np.zeros(n_polys), 
                           'sigma' : np.zeros(n_polys), 
-                          'V' : np.empty((n_polys, 0)).tolist(),
-                          'Tg_inf_conf' : np.empty((n_polys, 0)).tolist(),
-                          'K_conf' : np.empty((n_polys, 0)).tolist() })
+                          'V' : empty_list,
+                          'Tg_inf_conf' : empty_list,
+                          'K_conf' : empty_list })
 
 for i in poly_info.index:
     # Subset Data
@@ -99,15 +102,19 @@ for i in poly_info.index:
     plt.plot(dat_i.Mn, dat_i.Tg, '.', \
              Mn_fit, Tg_fit, '--', \
              Mn_fit, Tg_conf_up, 'k--', \
-             Mn_fit, Tg_conf_lo, 'k--',)
+             Mn_fit, Tg_conf_lo, 'k--', )
     plt.xscale('log')
     plt.xlabel('$M_n$ (g/mol)')
     plt.ylabel('$T_g$ (K)')
+    plt.legend(['PoLyInfo Data', 'OLS Fit', '95% Confidence Intervals'])
     plt.subplot(212)
-    plt.plot(dat_i.Mn, R, '.', Mn_fit, np.zeros(10000), '--')
+    plt.plot(dat_i.Mn, R, '.', \
+             Mn_fit, np.zeros(10000), '--', \
+             label=['PoLyInfo Data'])
     plt.xlabel('$M_n$ (g/mol)')
     plt.ylabel('Residuals (K)')
     plt.xscale('log')
+    plt.legend(['PoLyInfo Data', 'OLS Fit'])
     plt.savefig(o_prefix + '_plots/' + str(poly_info.name[i]) + '.png')
     plt.clf()
 
