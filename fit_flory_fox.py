@@ -41,7 +41,7 @@ if not os.path.isdir(o_prefix + '_plots'):
 plt.style.use('ggplot')
 
 ###############################################################################
-#        Get Unique Polymer Dataframe                                         #
+#        Initialize Polymer Dataframe                                         #
 ###############################################################################
 
 n_polys = raw_dat.pid.nunique()
@@ -129,7 +129,7 @@ of.write(poly_info.to_string(columns=['p_class', 'name','pid','Tg_inf',\
                                       'Tg_inf_conf','K','K_conf','n_pts',\
                                       'sigma','V'],
                              header=['Polymer Class', 'Polymer Name', 'PID',\
-                                     'Tg Limit (K)', 'Tg Limit 95% Conf. Int.',\
+                                     'Tg Max (K)', 'Tg Max 95% Conf. Int.',\
                                      'K (K mol/g)', 'K 95% Conf. Int.',\
                                      'n Data Points', 'sigma (K)',\
                                      'Covariance Matrix (V)'],
