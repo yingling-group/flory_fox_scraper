@@ -35,17 +35,34 @@ collected for each polymer targeted. CSV file includes:
 * Scraped Glass Transition Temperature in K (Tg)
 * Scraped Number-Averaged Molecular Weight in g/mol (Mn)
 
-### Required Packages
-```python
-re
-requests
-BeautifulSoup
-pandas
-```
 ### Notes
 Test with wired 100 GB/s connection timed at 4h 10min. Bulk of this time is
 waiting for responses from PoLyInfo database.
 
 ## `fit_flory_fox.py`
+This script takes formatted CSV file from `scrape_polyinfo.py` and performs a 
+ordinary least squares (OLS) fit of the 
+[Flory-Fox Equation](https://en.wikipedia.org/wiki/Flory%E2%80%93Fox_equation)
+to the data for each individual polymer class. Duplicate data and Tg and Mn
+points more than two standard deviations from mean are ignored.
 
+### Inputs
+User will be asked to provide an input filename, which must be a CSV file of
+the format as produced by the `scrape_polyinfo.py` script above. User will 
+also be asked for a output file prefix. This will determine the location and 
+name for the output text file as well as the fit plots.
 
+### Outputs
+Script will output a human-readable `.txt` file with information from each
+polymer in the input CSV file. Output for each polymer includes:
+
+* Polymer Class Name
+* Polymer Name
+* PID
+* Tg Max OLS Estimate in K
+* Tg Max 95% Confidence Interval OLS Estimate
+* K OLS Estimate in K mol/g
+* K 95% Confidence Interval OLS Estimate 
+* Number of Data Points Used for OLS Fit 
+* Square Root of OLS Error Variance Estimate (sigma)
+* OLS Covariance Matrix (V)
