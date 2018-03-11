@@ -85,7 +85,7 @@ def get_Tg_table(url,page_num):
         print '\tUnexpected format on page %i. Skipping...' % (page_num+1)
         table = BeautifulSoup('','lxml')
     return table
-        
+
 # Return list of floats contained within a string
 def get_nums(s):
     num_str = re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",\
@@ -141,12 +141,12 @@ polyinfo_df = pd.DataFrame(data = { 'p_class' : [],
 for class_i in all_classes:
     print 'Identifying candidate for %s class...' % (class_i)
     abbr_i = class_abbr[class_i]
-    
+
     # Re-login if necessary
     if (time.time()-t_last_login) > 7200.:
         print 'Session refresh required...'
         session_requests = polyinfo_login()
-    
+
     # Find C Count value with most Tg data points available
     class_url = 'http://polymer.nims.go.jp/PoLyInfo/cgi-bin/p-easy-ptable.cgi?'\
                 + 'H=Thermal&vtype=points&V=cn&vpclass=' + abbr_i + '&vcn='
@@ -187,10 +187,10 @@ for class_i in all_classes:
                 Tg_datapoints.append(0)
                 Tg_urls.append('')
     most_Tg_dps = max(Tg_datapoints)
-    pid_i = c_count_pid[Tg_datapoints.index(most_Tg_dps)]
+    pid_i = str(c_count_pid[Tg_datapoints.index(most_Tg_dps)])
     poly_name_i = str(c_count_names[Tg_datapoints.index(most_Tg_dps)])
     tgt_Tg_url = Tg_urls[Tg_datapoints.index(most_Tg_dps)]
-    if pid_i in polyinfo_df.pid:
+    if pid_i in polyinfo_df.pid.tolist():
         print 'Polymer %s (PID=%s) already compiled.' % (poly_name_i, pid_i)
         continue
     print( 'Candidate identified.\n' 
@@ -199,7 +199,7 @@ for class_i in all_classes:
           '\t%i Tg Measurements \n' 
            % (poly_name_i, pid_i, most_Tg_dps))
     sys.stdout.flush()
-    
+
     # Compile list of Sample ID's of neat resin from Tg datatable
     print '\tCompiling neat resin sample IDs...'
     n_pages = int(ceil(most_Tg_dps/20.))
