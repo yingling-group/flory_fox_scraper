@@ -27,13 +27,13 @@ Script will output status updates and timing info to `stdout` and a CSV file
 (default name `polyinfo.csv`) containing formatted information on data
 collected for each polymer targeted. CSV file includes:
 
-    * Polymer Class Name
-    * Polymer Class Abbreviation
-    * Full Polymer Name
-    * PoLyInfo Polymer Identification Number (PID)
-    * PoLyInfo Sample ID (SID)
-    * Scraped Glass Transition Temperature in K (Tg)
-    * Scraped Number-Averaged Molecular Weight in g/mol (Mn)
+* Polymer Class Name
+* Polymer Class Abbreviation
+* Full Polymer Name
+* PoLyInfo Polymer Identification Number (PID)
+* PoLyInfo Sample ID (SID)
+* Scraped Glass Transition Temperature in K (Tg)
+* Scraped Number-Averaged Molecular Weight in g/mol (Mn)
 
 ### Required Packages
 ```python
