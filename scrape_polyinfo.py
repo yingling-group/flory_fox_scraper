@@ -27,11 +27,12 @@ t_start = time.time()
 total_points = 0
 
 # Output File name:
-fname = raw_input('Enter output file name prefix: ')
+fname = 'polyinfo'
 
 # PoLyInfo Login Info
-email = raw_input('Enter PoLyInfo login email: ')
-password = raw_input('Password: ')
+email = "jspeerle@ncsu.edu"
+password = "0rr!S1*SAs1b"
+
 login_info = {
         "IDToken1" : email,
         "IDToken2" : password,
