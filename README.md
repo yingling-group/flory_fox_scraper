@@ -26,6 +26,7 @@ running in the background.
 Script will output status updates and timing info to `stdout` and a CSV file
 (default name `polyinfo.csv`) containing formatted information on data
 collected for each polymer targeted. CSV file includes:
+
     * Polymer Class Name
     * Polymer Class Abbreviation
     * Full Polymer Name
