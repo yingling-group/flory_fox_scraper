@@ -75,17 +75,17 @@ for i in poly_info.index:
         continue
     total_points = total_points + n
     p = 2
-    X = np.column_stack((np.ones(n), np.array(dat_i.rMn)))
+    X = np.column_stack((np.ones(n), np.array(dat_i.rMn*-1.)))
     q = inv(X.T.dot(X)).dot(X.T).dot(np.array(dat_i.Tg))
     R = dat_i.Tg - X.dot(q)
     sigma = sqrt((1./(n - p))*R.T.dot(R))
     V = sigma*sigma*inv(X.T.dot(X))
     Mn_fit = np.linspace(min(dat_i.Mn), max(dat_i.Mn), num=10000)
-    Tg_fit = q[0] + q[1]/Mn_fit
+    Tg_fit = q[0] - q[1]/Mn_fit
     q_conf_up = q + stats.t.ppf(1-0.025, (n-p))*np.sqrt(np.diag(V))
     q_conf_lo = q - stats.t.ppf(1-0.025, (n-p))*np.sqrt(np.diag(V))
-    Tg_conf_up = q_conf_up[0] + q_conf_up[1]/Mn_fit
-    Tg_conf_lo = q_conf_lo[0] + q_conf_lo[1]/Mn_fit
+    Tg_conf_up = q_conf_up[0] - q_conf_lo[1]/Mn_fit
+    Tg_conf_lo = q_conf_lo[0] - q_conf_up[1]/Mn_fit
     
     # Store in Dataframe
     poly_info.n_pts.iat[i] = n
@@ -122,7 +122,20 @@ for i in poly_info.index:
 #        Denoument                                                            #
 ###############################################################################
 
-print poly_info.to_csv(o_prefix + '.csv')
+# Write fit data to file
+pd.set_option("display.max_colwidth", 70)
+of = open(o_prefix + '.txt', 'w')
+of.write(poly_info.to_string(columns=['p_class', 'name','pid','Tg_inf',\
+                                      'Tg_inf_conf','K','K_conf','n_pts',\
+                                      'sigma','V'],
+                             header=['Polymer Class', 'Polymer Name', 'PID',\
+                                     'Tg Limit (K)', 'Tg Limit 95% Conf. Int.',\
+                                     'K (K mol/g)', 'K 95% Conf. Int.',\
+                                     'n Data Points', 'sigma (K)',\
+                                     'Covariance Matrix (V)'],
+                             float_format = '%.2f' ))
+of.close()
+
 total_time = time.time() - t_start
 print 'Success!'
 print 'Excecution time: %.2f min for %i data points' % \
