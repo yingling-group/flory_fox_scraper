@@ -60,9 +60,12 @@ polymer in the input CSV file. Output for each polymer includes:
 * Polymer Name
 * PID
 * Tg Max OLS Estimate in K
-* Tg Max 95% Confidence Interval OLS Estimate
+* Tg Max +/- 2 sigma Interval
 * K OLS Estimate in K mol/g
-* K 95% Confidence Interval OLS Estimate 
+* K +/- 2 sigma Interval
 * Number of Data Points Used for OLS Fit 
 * Square Root of OLS Error Variance Estimate (sigma)
 * OLS Covariance Matrix (V)
+
+PNG file plotting fit, data, and residuals for each polymer class is saved to
+a dedicated directory.

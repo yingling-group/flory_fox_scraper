@@ -18,7 +18,6 @@ import time
 import os
 import pandas as pd
 import numpy as np
-from scipy import stats
 from numpy.linalg import inv
 from math import sqrt
 import matplotlib
@@ -57,8 +56,8 @@ poly_info = pd.DataFrame({'name' : raw_dat.name.unique(),
                           'K' : np.zeros(n_polys), 
                           'sigma' : np.zeros(n_polys), 
                           'V' : empty_list,
-                          'Tg_inf_conf' : empty_list,
-                          'K_conf' : empty_list })
+                          'Tg_inf_int' : empty_list,
+                          'K_int' : empty_list })
 
 for i in poly_info.index:
     # Subset Data
@@ -80,12 +79,15 @@ for i in poly_info.index:
     R = dat_i.Tg - X.dot(q)
     sigma = sqrt((1./(n - p))*R.T.dot(R))
     V = sigma*sigma*inv(X.T.dot(X))
+    q_sig = np.sqrt(np.diag(V))
+    Tg_inf_int = [q[0]-(2.*q_sig[0]), q[0]+(2.*q_sig[0])]
+    K_int = [q[1]+(2.*q_sig[1]), q[1]-(2.*q_sig[1])]
+    
+    # Construct Fit Data
     Mn_fit = np.linspace(min(dat_i.Mn), max(dat_i.Mn), num=10000)
+    Tg_up = Tg_inf_int[1] - K_int[1]/Mn_fit
+    Tg_lo = Tg_inf_int[0] - K_int[0]/Mn_fit
     Tg_fit = q[0] - q[1]/Mn_fit
-    q_conf_up = q + stats.t.ppf(1-0.025, (n-p))*np.sqrt(np.diag(V))
-    q_conf_lo = q - stats.t.ppf(1-0.025, (n-p))*np.sqrt(np.diag(V))
-    Tg_conf_up = q_conf_up[0] - q_conf_lo[1]/Mn_fit
-    Tg_conf_lo = q_conf_lo[0] - q_conf_up[1]/Mn_fit
     
     # Store in Dataframe
     poly_info.n_pts.iat[i] = n
@@ -93,20 +95,20 @@ for i in poly_info.index:
     poly_info.K.iat[i] = q[1]
     poly_info.sigma.iat[i] = sigma
     poly_info.V.iat[i] = V
-    poly_info.Tg_inf_conf.iat[i] = [q_conf_up[0], q_conf_lo[0]]
-    poly_info.K_conf.iat[i] = [q_conf_up[1], q_conf_lo[1]]
+    poly_info.Tg_inf_int.iat[i] = Tg_inf_int
+    poly_info.K_int.iat[i] = K_int
     
     # Plot
     plt.figure(1,figsize=(6,10))
     plt.subplot(211)
     plt.plot(dat_i.Mn, dat_i.Tg, '.', \
              Mn_fit, Tg_fit, '--', \
-             Mn_fit, Tg_conf_up, 'k--', \
-             Mn_fit, Tg_conf_lo, 'k--', )
+             Mn_fit, Tg_up, 'k--', \
+             Mn_fit, Tg_lo, 'k--', )
     plt.xscale('log')
     plt.xlabel('$M_n$ (g/mol)')
     plt.ylabel('$T_g$ (K)')
-    plt.legend(['PoLyInfo Data', 'OLS Fit', '95% Confidence Intervals'])
+    plt.legend(['PoLyInfo Data', 'OLS Fit', '$2 \sigma$ Intervals'])
     plt.subplot(212)
     plt.plot(dat_i.Mn, R, '.', \
              Mn_fit, np.zeros(10000), '--', \
@@ -126,12 +128,12 @@ for i in poly_info.index:
 pd.set_option("display.max_colwidth", 70)
 of = open(o_prefix + '.txt', 'w')
 of.write(poly_info.to_string(columns=['p_class', 'name','pid','Tg_inf',\
-                                      'Tg_inf_conf','K','K_conf','n_pts',\
+                                      'Tg_inf_int','K','K_int','n_pts',\
                                       'sigma','V'],
                              header=['Polymer Class', 'Polymer Name', 'PID',\
-                                     'Tg Max (K)', 'Tg Max 95% Conf. Int.',\
-                                     'K (K mol/g)', 'K 95% Conf. Int.',\
-                                     'n Data Points', 'sigma (K)',\
+                                     'Tg Max (K)', 'Tg Max 2 sigma Int.',\
+                                     'K (K mol/g)', 'K 2 sigma Int.',\
+                                     'n Data Points', 'Variance (sigma)',\
                                      'Covariance Matrix (V)'],
                              float_format = '%.2f' ))
 of.close()
