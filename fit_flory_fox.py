@@ -85,9 +85,9 @@ for i in poly_info.index:
     
     # Construct Fit Data
     Mn_fit = np.linspace(min(dat_i.Mn), max(dat_i.Mn), num=10000)
-    Tg_up = Tg_inf_int[1] - K_int[1]/Mn_fit
-    Tg_lo = Tg_inf_int[0] - K_int[0]/Mn_fit
     Tg_fit = q[0] - q[1]/Mn_fit
+    Tg_up = Tg_fit + 2*sigma
+    Tg_lo = Tg_fit - 2*sigma
     
     # Store in Dataframe
     poly_info.n_pts.iat[i] = n
@@ -112,6 +112,8 @@ for i in poly_info.index:
     plt.subplot(212)
     plt.plot(dat_i.Mn, R, '.', \
              Mn_fit, np.zeros(10000), '--', \
+             Mn_fit, np.ones(10000)*2*sigma, 'k--', \
+             Mn_fit, np.ones(10000)*-2*sigma, 'k--', \
              label=['PoLyInfo Data'])
     plt.xlabel('$M_n$ (g/mol)')
     plt.ylabel('Residuals (K)')
