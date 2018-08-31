@@ -25,9 +25,6 @@ import pandas as pd
 t_start = time.time()
 total_points = 0
 
-# Output File name:
-fname = 'polyinfo'
-
 # PoLyInfo Login Info
 email = raw_input('Enter PoLyInfo username: ')
 password = raw_input('Enter PoLyInfo Password: ')
@@ -37,6 +34,9 @@ login_info = {
         "IDToken2" : password,
         "IDToken0" : "",
 }
+
+# Output File name:
+fname = raw_input('Enter output filename: ')
 
 ###############################################################################
 #        Functions                                                            #

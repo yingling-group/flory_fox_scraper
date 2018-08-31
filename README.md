@@ -17,15 +17,13 @@ polymer in each polymer class with the most Tg data reported, then scan samples
 to extract Tg and Mn data. All data is then printed to a CSV file.
 
 ### Inputs
-No inputs required.  PoLyInfo login information and output csv filename 
-(`polyinfo.csv`) is stored in the Initialization section of a script.
-This can easily be changed to a user input but is left in to allow for easy
-running in the background.
+A valid PoLyInfo login email and password is required. User will also be
+prompted for an output filename which will be the name of the output CSV file.
 
 ### Outputs
 Script will output status updates and timing info to `stdout` and a CSV file
-(default name `polyinfo.csv`) containing formatted information on data
-collected for each polymer targeted. CSV file includes:
+containing formatted information on data collected for each polymer targeted. 
+CSV file includes:
 
 * Polymer Class Name
 * Polymer Class Abbreviation
