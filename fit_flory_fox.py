@@ -7,7 +7,6 @@ Author: James S. Peerless
         Yingling Group
         NC State University
 
-For internal evaluation by Citrine Informatics only.
 '''
 
 ###############################################################################
