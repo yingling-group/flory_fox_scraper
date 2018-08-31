@@ -29,8 +29,8 @@ total_points = 0
 fname = 'polyinfo'
 
 # PoLyInfo Login Info
-email = "jspeerle@ncsu.edu"
-password = "0rr!S1*SAs1b"
+email = raw_input('Enter PoLyInfo username: ')
+password = raw_input('Enter PoLyInfo Password: ')
 
 login_info = {
         "IDToken1" : email,
