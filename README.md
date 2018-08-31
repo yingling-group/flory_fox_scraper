@@ -5,8 +5,8 @@ Program with scripts to:
     (b) perform a Flory-Fox fit - `fit_flory_fox.py`.
 
 Author: James S Peerless
-        Yingling Group
-		North Carolina State University
+    Yingling Group
+	North Carolina State University
 
 ## `scrape_polyinfo.py`
 This script will scrape the 
