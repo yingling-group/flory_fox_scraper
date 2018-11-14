@@ -1,12 +1,21 @@
 # flory_fox_scraper
 Program with scripts to:
-    (a) scrape information on glass transition temperatures of polymers - 
+1. scrape information on glass transition temperatures of polymers - 
         `scrape_polyinfo.py`, and
-    (b) perform a Flory-Fox fit - `fit_flory_fox.py`.
+2. perform a Flory-Fox fit - `fit_flory_fox.py`.
 
-Author: James S Peerless
-    Yingling Group
-	North Carolina State University
+Developed for case study in:  
+>J.S. Peerless, N.J.B. Milliken, T.J. Oweida, M.D. Manning, Y.G. Yingling, Soft 
+Matter Informatics: Current Progress and Challenges, Adv. Theory Simulations. 
+0 (2018) 1800129. 
+[doi:10.1002/adts.201800129](https://doi.org/10.1002/adts.201800129 "DOI").
+
+Please cite paper above if used.
+
+Author:  
+James S Peerless  
+Yingling Group  
+North Carolina State University  
 
 ## `scrape_polyinfo.py`
 This script will scrape the 
