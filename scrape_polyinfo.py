@@ -50,9 +50,7 @@ def polyinfo_login():
 
     # Login to PoLyInfo search page
     print 'Logging in to PoLyInfo...'
-    login_url = "https://login-matnavi.nims.go.jp/sso/UI/Login?goto="\
-            + "http%3A%2F%2Fpolymer.nims.go.jp%3A80%2FPoLyInfo%2Fcgi-bin%2Fp"\
-            +"-search.cgi"
+    login_url = "https://mdpf-cas.nims.go.jp/cas/login?service=https%3a%2f%2fpolymer.nims.go.jp%2fPoLyInfo%2fcgi-bin%2fp-search.cgi"
     login_result = ses_req.post(login_url, data = login_info)
     if 'Authentication failed.' in login_result.content:
         sys.exit("ERROR: PoLyInfo login unsuccessful."\
